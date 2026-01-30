@@ -47,7 +47,7 @@ import { container, card } from "./style";
 
 function Component() {
     return (
-        <div calssName={contianer}>
+        <div calssName={container}>
             <div className={card}>
                 ...
             </div>
