@@ -41,7 +41,7 @@ export function use(options: StyleOptions): Style {
 function toCss(
     jss: JSS,
     id: string,
-    media: string | undefined,
+    cssRule: string | undefined,
     indent: number,
     format: 0 | 1,
 ): string {
@@ -52,9 +52,9 @@ function toCss(
     const _n = "\n".repeat(format);
     const __ = " ".repeat(indent * 2 * format);
 
-    if (media) {
+    if (cssRule) {
         indent++;
-        css = __ + media + _ + "{" + _n;
+        css = __ + cssRule + _ + "{" + _n;
     }
 
     {
@@ -67,19 +67,30 @@ function toCss(
 
             if (typeof value === "object") {
                 let childId: string | undefined;
-                let childMedia: string | undefined;
+                let childCssRule: string | undefined;
 
                 if (property.startsWith("&")) {
                     childId = property.replace("&", id);
-                } else if (property.startsWith("@media")) {
+                } else if (
+                    property.startsWith("@media") ||
+                    property.startsWith("@supports") ||
+                    property.startsWith("@layer") ||
+                    property.startsWith("@scope")
+                ) {
                     childId = id;
-                    childMedia = property;
+                    childCssRule = property;
                 } else if (property.startsWith(":")) {
                     childId = id + property;
                 }
 
                 if (childId) {
-                    childrenCss += toCss(value, childId, childMedia, indent, format);
+                    childrenCss += toCss(
+                        value,
+                        childId,
+                        childCssRule,
+                        indent,
+                        format,
+                    );
                 }
             } else {
                 css += ______ + property
@@ -93,7 +104,7 @@ function toCss(
 
     css += childrenCss;
 
-    if (media) {
+    if (cssRule) {
         css += __ + "}" + _n;
     }
 
