@@ -72,7 +72,9 @@ function toCss(
                 let childSelector: string | undefined;
                 let childCssRule: string | undefined;
 
-                if (property.startsWith("&")) {
+                if (property.startsWith(":")) {
+                    childSelector = selector + property;
+                } else if (property.startsWith("&")) {
                     childSelector = property.replace("&", selector);
                 } else if (
                     property.startsWith("@media") ||
@@ -82,8 +84,6 @@ function toCss(
                 ) {
                     childSelector = selector;
                     childCssRule = property;
-                } else if (property.startsWith(":")) {
-                    childSelector = selector + property;
                 }
 
                 if (childSelector) {
