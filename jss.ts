@@ -23,7 +23,7 @@ export function use(options: StyleOptions): Style {
         jss<J extends JSS>(jss: J, tracker = ""): ClassNameOf<J> {
             const className = "jss-" + (hasht(jss, seed) >>> 0).toString(16) + tracker;
 
-            style.css += toCSS(
+            style.css += toCss(
                 jss,
                 "." + className,
                 undefined,
@@ -38,14 +38,15 @@ export function use(options: StyleOptions): Style {
     return style;
 }
 
-function toCSS(
+function toCss(
     jss: JSS,
     id: string,
     media: string | undefined,
     indent: number,
     format: 0 | 1,
-) {
+): string {
     let css: string = "";
+    let childrenCss: string = "";
 
     const _ = " ".repeat(format);
     const _n = "\n".repeat(format);
@@ -64,7 +65,23 @@ function toCSS(
         for (const property in jss) {
             const value = jss[property];
 
-            if (typeof value !== "object") {
+            if (typeof value === "object") {
+                let childId: string | undefined;
+                let childMedia: string | undefined;
+
+                if (property.startsWith("&")) {
+                    childId = property.replace("&", id);
+                } else if (property.startsWith("@media")) {
+                    childId = id;
+                    childMedia = property;
+                } else if (property.startsWith(":")) {
+                    childId = id + property;
+                }
+
+                if (childId) {
+                    childrenCss += toCss(value, childId, childMedia, indent, format);
+                }
+            } else {
                 css += ______ + property
                     .replace(/([a-z0-9])([A-Z])/g, "$1-$2")
                     .replace(/([A-Z])([A-Z][a-z])/g, "$1-$2")
@@ -74,27 +91,7 @@ function toCSS(
         css += ___ + "}" + _n;
     }
 
-    for (const property in jss) {
-        const value = jss[property];
-
-        if (typeof value === "object") {
-            let media: string | undefined;
-            let _id: string | undefined;
-
-            if (property.startsWith("&")) {
-                _id = property.replace("&", id);
-            } else if (property.startsWith("@media")) {
-                _id = id;
-                media = property;
-            } else if (property.startsWith(":")) {
-                _id = id + property;
-            }
-
-            if (_id) {
-                css += toCSS(value, _id, media, indent, format);
-            }
-        }
-    }
+    css += childrenCss;
 
     if (media) {
         css += __ + "}" + _n;
