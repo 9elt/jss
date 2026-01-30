@@ -5,6 +5,7 @@ type JSS = Partial<CSSStyle> & {
 type StyleOptions = {
     seed?: string;
     minify?: boolean;
+    indentation?: string;
 };
 
 type Style = {
@@ -16,6 +17,7 @@ type ClassNameOf<_> = string & { length: number };
 
 export function use(options: StyleOptions): Style {
     const format = options.minify ? 0 : 1;
+    const indentation = options.indentation ?? "  ";
     const seed = hashp(options.seed ?? "global");
 
     const style: Style = {
@@ -27,8 +29,8 @@ export function use(options: StyleOptions): Style {
                 jss,
                 "." + className,
                 undefined,
-                0,
                 format,
+                indentation,
             );
 
             return className as ClassNameOf<J>;
@@ -40,66 +42,68 @@ export function use(options: StyleOptions): Style {
 
 function toCss(
     jss: JSS,
-    id: string,
+    selector: string,
     cssRule: string | undefined,
-    indent: number,
     format: 0 | 1,
+    indentation: string,
+    indentationDepth: number = 0,
 ): string {
-    let css: string = "";
-    let childrenCss: string = "";
+    let css = "";
+    let childrenCss = "";
 
     const _ = " ".repeat(format);
     const _n = "\n".repeat(format);
-    const __ = " ".repeat(indent * 2 * format);
+    const __ = indentation.repeat(format * indentationDepth);
 
     if (cssRule) {
-        indent++;
+        indentationDepth++;
         css = __ + cssRule + _ + "{" + _n;
     }
 
-    {
-        const ___ = " ".repeat(indent * 2 * format);
-        const ______ = " ".repeat((indent + 1) * 2 * format);
+    const ____ = indentation.repeat(format * indentationDepth);
+    const ________ = indentation.repeat(format * (indentationDepth + 1));
 
-        css += ___ + id + _ + "{" + _n;
+    {
+        css += ____ + selector + _ + "{" + _n;
         for (const property in jss) {
             const value = jss[property];
 
             if (typeof value === "object") {
-                let childId: string | undefined;
+                let childSelector: string | undefined;
                 let childCssRule: string | undefined;
 
                 if (property.startsWith("&")) {
-                    childId = property.replace("&", id);
+                    childSelector = property.replace("&", selector);
                 } else if (
                     property.startsWith("@media") ||
                     property.startsWith("@supports") ||
                     property.startsWith("@layer") ||
                     property.startsWith("@scope")
                 ) {
-                    childId = id;
+                    childSelector = selector;
                     childCssRule = property;
                 } else if (property.startsWith(":")) {
-                    childId = id + property;
+                    childSelector = selector + property;
                 }
 
-                if (childId) {
+                if (childSelector) {
                     childrenCss += toCss(
                         value,
-                        childId,
+                        childSelector,
                         childCssRule,
-                        indent,
                         format,
+                        indentation,
+                        indentationDepth,
                     );
                 }
             } else {
-                css += ______ + property
+                css += ________ + property
                     .replace(/([a-z0-9])([A-Z])/g, "$1-$2")
                     .replace(/([A-Z])([A-Z][a-z])/g, "$1-$2")
                     .toLowerCase() + ":" + _ + value + ";" + _n;
             }
         }
-        css += ___ + "}" + _n;
+        css += ____ + "}" + _n;
     }
 
     css += childrenCss;
