@@ -1,0 +1,11 @@
+{
+    "include": [
+        "index.ts"
+    ],
+    "compilerOptions": {
+        "target": "ESNext",
+        "module": "ESNext",
+        "allowJs": true,
+        "declaration": true,
+    }
+}

@@ -1,6 +1,21 @@
 {
-  "dependencies": {},
-  "devDependencies": {
-    "@types/bun": "^1.3.8"
-  }
+    "name": "@9elt/jss",
+    "version": "0.0.1",
+    "description": "CSS Modules in JavaScript",
+    "type": "module",
+    "main": "./index.js",
+    "author": "Lorenzo Cicuttin",
+    "license": "MIT",
+    "keywords": [
+        "css",
+        "jss",
+        "style",
+        "module"
+    ],
+    "readme": "./README.md",
+    "homepage": "github:9elt/jss",
+    "repository": "github:9elt/jss",
+    "devDependencies": {
+        "@types/bun": "^1.3.8"
+    }
 }

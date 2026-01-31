@@ -1,4 +1,4 @@
-import { use } from "./jss";
+import { use } from "..";
 
 export const style = use({ seed: "example" });
 

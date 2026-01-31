@@ -1,4 +1,4 @@
-# JSS
+# @9elt/jss
 
 > [!NOTE]
 > This is a proof of concept. Some parts require further design work.
